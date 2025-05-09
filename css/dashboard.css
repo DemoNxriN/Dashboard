@@ -3,12 +3,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-4);
-
-}
-
-/* Status Cards */
-.status-overview {
-  margin-top: var(--space-4);
 }
 
 .status-cards {
@@ -173,7 +167,21 @@
 
 .alert-list {
   overflow-y: auto;
-  max-height: 700px;
+  max-height: 740px;
+  padding-right: var(--space-2);
+}
+
+.alert-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.alert-list::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary-light);
+  border-radius: var(--border-radius-sm);
+}
+
+.alert-list::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .alert-item {
