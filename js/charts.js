@@ -1,224 +1,302 @@
-/**
- * Gráficas para el Dashboard de Monitorización
- */
+// Variables para almacenar las instancias de Chart.js
+let cpuChart;
+let memoryChart;
+let networkChart;
 
-// Clase para gestionar las gráficas
-class Chart {
-  constructor(elementId, options = {}) {
-    this.element = document.getElementById(elementId);
-    if (!this.element) {
-      console.error(`Elemento con id ${elementId} no encontrado`);
-      return;
-    }
-    
-    this.options = Object.assign({
-      maxPoints: 24, // Puntos máximos a mostrar
-      color: 'var(--color-primary)',
-      fillColor: 'var(--chart-primary-light)',
-      animated: true,
-      showLabels: true,
-      maxValue: 100,
-      minValue: 0
-    }, options);
-    
-    this.data = [];
-    this.init();
-  }
-  
-  init() {
-    // Limpiar contenido previo
-    this.element.innerHTML = '';
-    
-    // Añadir grid de fondo
-    const grid = document.createElement('div');
-    grid.className = 'chart-grid';
-    for (let i = 0; i < 4; i++) {
-      const line = document.createElement('div');
-      line.className = 'chart-grid-line';
-      grid.appendChild(line);
-    }
-    this.element.appendChild(grid);
-    
-    // Contenedor para los puntos y líneas
-    this.pointsContainer = document.createElement('div');
-    this.pointsContainer.className = 'chart-points';
-    this.element.appendChild(this.pointsContainer);
-    
-    // Área de relleno
-    this.areaElement = document.createElement('div');
-    this.areaElement.className = 'chart-area';
-    this.element.appendChild(this.areaElement);
-    
-    // Etiquetas de tiempo (eje X)
-    if (this.options.showLabels) {
-      const labels = document.createElement('div');
-      labels.className = 'chart-labels';
-      
-      // Añadir 5 etiquetas para distribuir a lo largo del eje X
-      for (let i = 0; i < 5; i++) {
-        const label = document.createElement('div');
-        label.className = 'chart-label';
-        const hour = new Date();
-        hour.setHours(hour.getHours() - (4 - i) * (this.options.maxPoints / 5));
-        label.textContent = hour.getHours() + ':00';
-        labels.appendChild(label);
-      }
-      
-      this.element.appendChild(labels);
-      
-      // Etiquetas de valores (eje Y)
-      const valueLabels = document.createElement('div');
-      valueLabels.className = 'chart-value-labels';
-      
-      // Añadir 4 etiquetas para distribuir a lo largo del eje Y
-      const valueStep = (this.options.maxValue - this.options.minValue) / 4;
-      for (let i = 0; i <= 4; i++) {
-        const label = document.createElement('div');
-        label.className = 'chart-value-label';
-        const value = this.options.maxValue - (i * valueStep);
-        label.textContent = `${Math.round(value)}%`;
-        valueLabels.appendChild(label);
-      }
-      
-      this.element.appendChild(valueLabels);
-    }
-    
-    // Crear tooltip
-    this.tooltip = document.createElement('div');
-    this.tooltip.className = 'tooltip';
-    document.body.appendChild(this.tooltip);
-  }
-  
-  // Actualizar con nuevos datos
-  update(newValue) {
-    // Agregar nuevo punto
-    const now = new Date();
-    this.data.push({
-      value: newValue,
-      time: now.getTime()
+// Arrays para almacenar el historial de datos
+const MAX_HISTORY_POINTS = 30; // Número máximo de puntos en el historial
+const labels = []; // Etiquetas de tiempo para el eje X
+
+const cpuUsageHistory = [];
+const memoryUsageHistory = [];
+const networkDownloadHistory = [];
+const networkUploadHistory = [];
+const networkLatencyHistory = [];
+
+/**
+ * Inicializa todos los gráficos del dashboard.
+ * Se llama una vez al cargar la página.
+ */
+function initializeCharts() {
+    console.log("INTENTO: Inicializando gráficos...");
+
+    const cpuCanvas = document.getElementById('cpu-chart');
+    const memoryCanvas = document.getElementById('memory-chart');
+    const networkCanvas = document.getElementById('network-chart');
+
+    if (!cpuCanvas) { console.error("ERROR: No se encontró el canvas #cpu-chart."); return; }
+    if (!memoryCanvas) { console.error("ERROR: No se encontró el canvas #memory-chart."); return; }
+    if (!networkCanvas) { console.error("ERROR: No se encontró el canvas #network-chart."); return; }
+
+    const cpuCtx = cpuCanvas.getContext('2d');
+    const memoryCtx = memoryCanvas.getContext('2d');
+    const networkCtx = networkCanvas.getContext('2d');
+
+    if (!cpuCtx) { console.error("ERROR: No se pudo obtener el contexto 2D para #cpu-chart."); return; }
+    if (!memoryCtx) { console.error("ERROR: No se pudo obtener el contexto 2D para #memory-chart."); return; }
+    if (!networkCtx) { console.error("ERROR: No se pudo obtener el contexto 2D para #network-chart."); return; }
+
+    console.log("ÉXITO: Se encontraron todos los canvas y se obtuvieron los contextos 2D.");
+
+    // Configuración base para todos los gráficos
+    const commonChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false, // Permite que los gráficos se adapten a su contenedor
+        animation: {
+            duration: 0 // Deshabilita la animación para actualizaciones rápidas
+        },
+        scales: {
+            x: {
+                type: 'category', // O 'timeseries' si usas fechas exactas
+                labels: labels,
+                title: {
+                    display: true,
+                    text: 'Tiempo'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Valor'
+                },
+                ticks: {
+                    callback: function(value) {
+                        return value + '%'; // Por defecto para porcentajes
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false // O true si tienes múltiples datasets
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            }
+        }
+    };
+
+    // --- CPU Chart ---
+    cpuChart = new Chart(cpuCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Uso de CPU',
+                data: cpuUsageHistory,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+            scales: {
+                ...commonChartOptions.scales,
+                y: {
+                    ...commonChartOptions.scales.y,
+                    title: {
+                        display: true,
+                        text: 'Uso (%)'
+                    }
+                }
+            },
+            plugins: {
+                ...commonChartOptions.plugins,
+                legend: {
+                    display: true
+                }
+            }
+        }
     });
-    
-    // Mantener solo los últimos N puntos
-    if (this.data.length > this.options.maxPoints) {
-      this.data = this.data.slice(this.data.length - this.options.maxPoints);
-    }
-    
-    this.render();
-  }
-  
-  // Renderizar la gráfica
-  render() {
-    if (!this.element || this.data.length < 2) return;
-    
-    // Limpiar puntos anteriores
-    this.pointsContainer.innerHTML = '';
-    
-    const width = this.element.offsetWidth;
-    const height = this.element.offsetHeight;
-    const pointSpacing = width / (this.options.maxPoints - 1);
-    
-    let points = [];
-    
-    // Crear puntos y líneas
-    this.data.forEach((point, index) => {
-      const x = index * pointSpacing;
-      // Normalizar el valor entre 0 y altura del contenedor
-      const normalizedValue = (point.value - this.options.minValue) / 
-                             (this.options.maxValue - this.options.minValue);
-      const y = height - (normalizedValue * height);
-      
-      points.push({ x, y, data: point });
-      
-      if (index > 0) {
-        // Crear línea desde el punto anterior a este
-        const prevPoint = points[index - 1];
-        const lineLength = Math.sqrt(Math.pow(x - prevPoint.x, 2) + Math.pow(y - prevPoint.y, 2));
-        const angle = Math.atan2(y - prevPoint.y, x - prevPoint.x) * (180 / Math.PI);
-        
-        const line = document.createElement('div');
-        line.className = 'chart-line';
-        line.style.width = `${lineLength}px`;
-        line.style.left = `${prevPoint.x}px`;
-        line.style.top = `${prevPoint.y}px`;
-        line.style.transform = `rotate(${angle}deg)`;
-        line.style.backgroundColor = this.options.color;
-        
-        this.pointsContainer.appendChild(line);
-      }
-      
-      // Crear punto
-      const dot = document.createElement('div');
-      dot.className = 'chart-dot';
-      dot.style.left = `${x}px`;
-      dot.style.top = `${y}px`;
-      dot.style.backgroundColor = this.options.color;
-      
-      // Añadir evento para mostrar tooltip al pasar el ratón
-      dot.addEventListener('mouseover', (e) => {
-        this.tooltip.innerHTML = `
-          <div class="tooltip-title">Valor</div>
-          <div class="tooltip-value">${point.value}%</div>
-          <div class="tooltip-time">${formatTime(point.time)}</div>
-        `;
-        this.tooltip.style.opacity = '1';
-        this.tooltip.style.left = `${e.pageX + 10}px`;
-        this.tooltip.style.top = `${e.pageY - 40}px`;
-      });
-      
-      dot.addEventListener('mouseout', () => {
-        this.tooltip.style.opacity = '0';
-      });
-      
-      this.pointsContainer.appendChild(dot);
+    console.log("CPU Chart creado.");
+
+    // --- Memory Chart ---
+    memoryChart = new Chart(memoryCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Uso de Memoria',
+                data: memoryUsageHistory,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+            scales: {
+                ...commonChartOptions.scales,
+                y: {
+                    ...commonChartOptions.scales.y,
+                    title: {
+                        display: true,
+                        text: 'Uso (%)'
+                    }
+                }
+            },
+            plugins: {
+                ...commonChartOptions.plugins,
+                legend: {
+                    display: true
+                }
+            }
+        }
     });
-    
-    // Actualizar área de relleno
-    if (points.length > 1) {
-      const areaPoints = [...points];
-      // Añadir puntos en las esquinas inferiores para completar el polígono
-      areaPoints.push({ x: points[points.length - 1].x, y: height });
-      areaPoints.push({ x: points[0].x, y: height });
-      
-      // Ajustar la altura para que coincida con el último punto
-      this.areaElement.style.height = `${height - points[points.length - 1].y}px`;
-      this.areaElement.style.width = `${points[points.length - 1].x}px`;
-    }
-  }
-  
-  // Método para simular datos aleatorios (para demostración)
-  simulateData() {
-    // Generar un valor aleatorio con tendencia (basado en el último valor si existe)
-    let newValue;
-    if (this.data.length > 0) {
-      const lastValue = this.data[this.data.length - 1].value;
-      // Generar un cambio entre -5 y +5 puntos
-      const change = Math.random() * 10 - 5;
-      newValue = Math.max(this.options.minValue, Math.min(this.options.maxValue, lastValue + change));
-    } else {
-      // Primer valor aleatorio entre 40-60
-      newValue = Math.random() * 20 + 40;
-    }
-    
-    this.update(Math.round(newValue));
-  }
+    console.log("Memory Chart creado.");
+
+
+    // --- Network Chart ---
+    networkChart = new Chart(networkCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Descarga (Mbps)',
+                    data: networkDownloadHistory,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false, // No rellenar para ver ambas líneas claramente
+                    tension: 0.1,
+                    yAxisID: 'yDownload'
+                },
+                {
+                    label: 'Subida (Mbps)',
+                    data: networkUploadHistory,
+                    borderColor: 'rgb(255, 159, 64)',
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    fill: false,
+                    tension: 0.1,
+                    yAxisID: 'yUpload'
+                },
+                 {
+                    label: 'Latencia (ms)',
+                    data: networkLatencyHistory,
+                    borderColor: 'rgb(153, 102, 255)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    fill: false,
+                    tension: 0.1,
+                    yAxisID: 'yLatency' // Nuevo eje Y para latencia
+                }
+            ]
+        },
+        options: {
+            ...commonChartOptions,
+            scales: {
+                x: {
+                    ...commonChartOptions.scales.x,
+                },
+                yDownload: { // Eje Y para descarga
+                    type: 'linear',
+                    position: 'left',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Mbps'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' Mbps';
+                        }
+                    }
+                },
+                yUpload: { // Eje Y para subida (puede compartir con descarga o tener su propio eje si los rangos son muy diferentes)
+                    type: 'linear',
+                    position: 'left', // Puede ser 'right' si quieres separarlo visualmente
+                    beginAtZero: true,
+                    title: {
+                        display: false // Ocultar si comparte la misma escala que descarga
+                    },
+                     grid: {
+                         drawOnChartArea: false // Evitar que las líneas de la cuadrícula se dibujen dos veces
+                     },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' Mbps';
+                        }
+                    }
+                },
+                yLatency: { // Nuevo eje Y para latencia
+                    type: 'linear',
+                    position: 'right', // Colocar en el lado derecho
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Latencia (ms)'
+                    },
+                    grid: {
+                        drawOnChartArea: false // No dibujar la cuadrícula para este eje
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' ms';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                ...commonChartOptions.plugins,
+                legend: {
+                    display: true // Mostrar leyenda para múltiples datasets
+                }
+            }
+        }
+    });
+    console.log("Network Chart creado.");
+    console.log("Gráficos inicializados con éxito.");
 }
 
-// Inicializar gráficas cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-  // Crear instancias de gráficas
-  window.cpuChart = new Chart('cpu-chart', {
-    color: 'var(--color-primary)',
-    fillColor: 'var(--chart-primary-light)'
-  });
-  
-  window.memoryChart = new Chart('memory-chart', {
-    color: 'var(--color-success)',
-    fillColor: 'var(--chart-secondary-light)'
-  });
-  
-  // Generar datos iniciales (para demostración)
-  for (let i = 0; i < 24; i++) {
-    window.cpuChart.simulateData();
-    window.memoryChart.simulateData();
-  }
-});
+/**
+ * Actualiza los gráficos con los nuevos datos recibidos.
+ * @param {object} data - El objeto JSON con las últimas métricas.
+ */
+function updateCharts(data) {
+    console.log("INTENTO: Actualizando gráficos con nuevos datos...");
+    // Añadir el nuevo punto de datos
+    const currentTime = new Date().toLocaleTimeString('es-ES');
+    labels.push(currentTime);
+    cpuUsageHistory.push(data.cpu.usage_percentage || 0);
+    // Asegurarse de que memoryUsage esté definido y sea un número antes de usarlo
+    const memoryUsage = ((data.memory.used_gb || 0) / (data.memory.total_gb || 1)) * 100;
+    memoryUsageHistory.push(parseFloat(memoryUsage.toFixed(1)) || 0); // Asegurarse de que sea número
+    networkDownloadHistory.push(data.network.download_mbps || 0);
+    networkUploadHistory.push(data.network.upload_mbps || 0);
+    networkLatencyHistory.push(data.network.latency_ms || 0);
+
+    // Mantener solo el número máximo de puntos en el historial
+    if (labels.length > MAX_HISTORY_POINTS) {
+        labels.shift();
+        cpuUsageHistory.shift();
+        memoryUsageHistory.shift();
+        networkDownloadHistory.shift();
+        networkUploadHistory.shift();
+        networkLatencyHistory.shift();
+    }
+
+    // Actualizar los gráficos
+    if (cpuChart) {
+        cpuChart.update();
+        console.log("CPU Chart actualizado.");
+    } else {
+        console.warn("CPU Chart no inicializado, no se puede actualizar.");
+    }
+    if (memoryChart) {
+        memoryChart.update();
+        console.log("Memory Chart actualizado.");
+    } else {
+        console.warn("Memory Chart no inicializado, no se puede actualizar.");
+    }
+    if (networkChart) {
+        networkChart.update();
+        console.log("Network Chart actualizado.");
+    } else {
+        console.warn("Network Chart no inicializado, no se puede actualizar.");
+    }
+    console.log("FIN: Intento de actualización de gráficos.");
+}

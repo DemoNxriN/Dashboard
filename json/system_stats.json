@@ -1,0 +1,14 @@
+{
+  "execution_time": "2025-05-22 13:04:04",
+  "uptime": "53 minutes",
+  "ip": "",
+  "hostname": "LinuxGUI24",
+  "os": "Ubuntu 24.04.1 LTS",
+  "location": "España, Barcelona",
+  "cpu": {"usage_percentage": 28, "cores": 2},
+  "memory": {"total_gb": 3, "used_gb": 1, "free_gb": 1},
+  "disk": {"total_gb": 40, "used_gb": 7.2, "available_gb": 30, "usage_percentage": 20},
+  "services": {"apache": "not_found", "nginx": "not_found", "mysql": "not_found", "bind9": "not_found", "isc-dhcp-server": "not_found"},
+  "network": {"download_mbps": 0, "upload_mbps": 0, "latency_ms": 0},
+  "temperature_celsius": 0
+}

@@ -96,6 +96,14 @@
   width: 100%;
 }
 
+/* Gauges */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .gauge {
   width: 100%;
   height: 8px;
@@ -110,12 +118,16 @@
   width: 0%;
   background-color: var(--color-primary);
   border-radius: 4px;
-  transition: width 1s ease-out;
+  transition: width 1s ease, background-color 1s ease;
+  /* Para que el borde derecho no se redondee al 100% (solo izquierda) */
+  border-radius: 4px 0 0 4px;
 }
 
 .gauge-percentage {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
+  margin-top: 4px;
+  color: var(--color-text-primary);
 }
 
 /* Network stats */

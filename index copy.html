@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <header class="main-header">
@@ -67,15 +66,15 @@
         <div class="charts-container">
           <div class="chart-card">
             <h3>CPU (En Uso)</h3>
-            <canvas id="cpu-chart" class="chart"></canvas> 
+            <div class="chart" id="cpu-chart"></div>
           </div>
           <div class="chart-card">
             <h3>Memoria (En Uso)</h3>
-            <canvas id="memory-chart" class="chart"></canvas>
+            <div class="chart" id="memory-chart"></div>
           </div>
           <div class="chart-card">
-            <h3>Ancho de Banda (Tráfico de red)</h3>
-            <canvas id="network-chart" class="chart"></canvas>
+            <h3>Ancho de Banda (En Uso)</h3>
+            <div class="chart" id="network-chart"></div>
           </div>
         </div>
       </section>
@@ -84,7 +83,8 @@
         <h2>Alertas y Eventos</h2>
         <div class="alerts-container">
           <div class="alert-list" id="alert-list">
-            </div>
+            <!-- Las alertas se generarán dinámicamente -->
+          </div>
         </div>
       </section>
 
@@ -179,7 +179,10 @@
       <p>© 2025 360º Insight - Monitorización en tiempo real</p>
       <p>Última actualización: <span id="last-update">--:--:--</span></p>
     </footer>
-    <script src="js/charts.js" defer></script>
-    <script src="js/main.js" defer></script>
+
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/servers.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>
