@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard de Monitorización</title>
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/header.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+        <script src="./js/charts.js" ></script>
+    <script src="./js/main.js" ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
   <body>
@@ -37,7 +38,7 @@
         <div class="details-container">
           <div class="details-row">
             <span class="detail-label">Nombre:</span>
-            <span class="detail-value" id="server-name">Servidor Web</span>
+            <span class="detail-value" id="server-name"></span>
           </div>
           <div class="details-row">
             <span class="detail-label">IP:</span>
@@ -101,12 +102,12 @@
                 <div class="gauge">
                   <div class="gauge-fill" id="cpu-gauge"></div>
                 </div>
-                <div class="gauge-percentage" id="cpu-percentage">0%</div>
+                <div class="gauge-percentage" id="cpu-percentage"></div>
               </div>
             </div>
             <div class="status-card-footer">
               <span class="detail-label">Núcleos:</span>
-              <span class="detail-value" id="cpu-cores">8</span>
+              <span class="detail-value" id="cpu-cores"></span>
             </div>
           </div>
 
@@ -120,12 +121,12 @@
                 <div class="gauge">
                   <div class="gauge-fill" id="memory-gauge"></div>
                 </div>
-                <div class="gauge-percentage" id="memory-percentage">0%</div>
+                <div class="gauge-percentage" id="memory-percentage"></div>
               </div>
             </div>
             <div class="status-card-footer">
               <span class="detail-label">Total:</span>
-              <span class="detail-value" id="memory-total">16 GB</span>
+              <span class="detail-value" id="memory-total"></span>
             </div>
           </div>
 
@@ -139,12 +140,12 @@
                 <div class="gauge">
                   <div class="gauge-fill" id="disk-gauge"></div>
                 </div>
-                <div class="gauge-percentage" id="disk-percentage">0%</div>
+                <div class="gauge-percentage" id="disk-percentage"></div>
               </div>
             </div>
             <div class="status-card-footer">
               <span class="detail-label">Libre:</span>
-              <span class="detail-value" id="disk-free">450 GB</span>
+              <span class="detail-value" id="disk-free"></span>
             </div>
           </div>
 
@@ -179,7 +180,5 @@
       <p>© 2025 360º Insight - Monitorización en tiempo real</p>
       <p>Última actualización: <span id="last-update">--:--:--</span></p>
     </footer>
-    <script src="js/charts.js" defer></script>
-    <script src="js/main.js" defer></script>
   </body>
 </html>

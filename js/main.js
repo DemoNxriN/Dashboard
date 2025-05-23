@@ -1,4 +1,3 @@
-// This function will fetch data from the JSON file and update the dashboard
 async function fetchAndDisplaySystemStats() {
     try {
         const response = await fetch('/json/system_stats.json');
@@ -7,7 +6,6 @@ async function fetchAndDisplaySystemStats() {
         }
         const data = await response.json();
 
-        // --- Server Details Section ---
         document.getElementById('server-name').textContent = data.hostname || 'N/A';
         document.getElementById('server-ip').textContent = data.ip || 'N/A';
         document.getElementById('server-os').textContent = data.os || 'N/A';
@@ -15,8 +13,6 @@ async function fetchAndDisplaySystemStats() {
         document.getElementById('server-temp').textContent = `${data.temperature_celsius || 0}°C`;
         document.getElementById('server-location').textContent = data.location || 'N/A';
 
-        // --- Status Overview Section (Gauges and Percentages) ---
-        // CPU
         const cpuUsage = data.cpu.usage_percentage || 0;
         document.getElementById('cpu-gauge').style.width = `${cpuUsage}%`;
         document.getElementById('cpu-percentage').textContent = `${cpuUsage}%`;
@@ -31,10 +27,9 @@ async function fetchAndDisplaySystemStats() {
             cpuStatusIndicator.className = 'status-indicator critical';
         }
 
-        // Memory
         const memoryUsedGb = data.memory.used_gb || 0;
         const memoryTotalGb = data.memory.total_gb || 0;
-        let memoryUsage = 0;
+        let memoryUsage = 0; // Esta es la variable que calculamos
         if (memoryTotalGb > 0) {
             memoryUsage = (memoryUsedGb / memoryTotalGb) * 100;
         }
@@ -51,13 +46,11 @@ async function fetchAndDisplaySystemStats() {
             memoryStatusIndicator.className = 'status-indicator critical';
         }
 
-        // Disk
         const diskUsage = data.disk.usage_percentage || 0;
         const diskFreeGb = data.disk.available_gb || 0;
         document.getElementById('disk-gauge').style.width = `${diskUsage}%`;
         document.getElementById('disk-percentage').textContent = `${diskUsage}%`;
         document.getElementById('disk-free').textContent = `${diskFreeGb} GB`;
-        // Update status indicator for Disk
         const diskStatusIndicator = document.querySelector('.status-card[data-type="disk"] .status-indicator');
         if (diskUsage < 70) {
             diskStatusIndicator.className = 'status-indicator healthy';
@@ -67,30 +60,25 @@ async function fetchAndDisplaySystemStats() {
             diskStatusIndicator.className = 'status-indicator critical';
         }
 
-        // Network
         const networkDownload = data.network.download_mbps || 0;
         const networkUpload = data.network.upload_mbps || 0;
         const networkLatency = data.network.latency_ms || 0;
         document.getElementById('network-download').textContent = `${networkDownload} Mbps`;
         document.getElementById('network-upload').textContent = `${networkUpload} Mbps`;
         document.getElementById('network-latency').textContent = `${networkLatency} ms`;
-        // Update status indicator for Network (based on latency, can be adjusted)
         const networkStatusIndicator = document.querySelector('.status-card[data-type="network"] .status-indicator');
-        if (networkLatency < 50) { // Example: Latency under 50ms is healthy
+        if (networkLatency < 50) {
             networkStatusIndicator.className = 'status-indicator healthy';
-        } else if (networkLatency < 100) { // Example: Latency under 100ms is warning
+        } else if (networkLatency < 100) {
             networkStatusIndicator.className = 'status-indicator warning';
         } else {
             networkStatusIndicator.className = 'status-indicator critical';
         }
 
 
-        // --- Alerts and Events Section ---
         const alertList = document.getElementById('alert-list');
-        alertList.innerHTML = ''; // Clear previous alerts
+        alertList.innerHTML = ''; 
 
-        // --- Generate Alerts based on thresholds ---
-        // Helper function to add an alert
         function addAlert(message, type = 'info', icon = 'ℹ️') {
             const alertItem = document.createElement('div');
             alertItem.classList.add('alert-item', type);
@@ -102,11 +90,10 @@ async function fetchAndDisplaySystemStats() {
             alertList.appendChild(alertItem);
         }
 
-        // 1. Service Status Alerts (existing logic)
         for (const serviceName in data.services) {
             const status = data.services[serviceName];
             if (status !== 'active' && status !== 'inactive') {
-                let alertType = 'info'; // Default for unknown/not_found
+                let alertType = 'info';
                 let alertIcon = '⚠️';
                 if (status === 'failed') {
                     alertType = 'error';
@@ -116,37 +103,34 @@ async function fetchAndDisplaySystemStats() {
                     alertIcon = '⚠️';
                 } else if (status === 'not_found') {
                     alertType = 'info';
-                    alertIcon = 'ℹ️'; // Using info icon for not_found
+                    alertIcon = 'ℹ️';
                 }
                 addAlert(`Servicio "${serviceName}" está en estado: <strong>${status}</strong>.`, alertType, alertIcon);
             }
         }
 
-        // 2. RAM Usage Alerts
-        const RAM_CRITICAL_THRESHOLD = 90; // %
-        const RAM_WARNING_THRESHOLD = 70; // %
+        const RAM_CRITICAL_THRESHOLD = 90;
+        const RAM_WARNING_THRESHOLD = 70;
         if (memoryUsage >= RAM_CRITICAL_THRESHOLD) {
             addAlert(`Uso de RAM CRÍTICO: ${memoryUsage.toFixed(1)}%.`, 'error', '🚨');
         } else if (memoryUsage >= RAM_WARNING_THRESHOLD) {
             addAlert(`Uso de RAM ELEVADO: ${memoryUsage.toFixed(1)}%.`, 'warning', '⚠️');
-        } else if (memoryUsage > 50 && memoryUsage < RAM_WARNING_THRESHOLD) { // Informative alert for moderate use
+        } else if (memoryUsage > 50 && memoryUsage < RAM_WARNING_THRESHOLD) {
             addAlert(`Uso de RAM moderado: ${memoryUsage.toFixed(1)}%.`, 'info', 'ℹ️');
         }
 
-        // 3. Disk Usage Alerts
-        const DISK_CRITICAL_THRESHOLD = 90; // %
-        const DISK_WARNING_THRESHOLD = 70; // %
+        const DISK_CRITICAL_THRESHOLD = 90;
+        const DISK_WARNING_THRESHOLD = 70;
         if (diskUsage >= DISK_CRITICAL_THRESHOLD) {
             addAlert(`Uso de Disco CRÍTICO: ${diskUsage}%.`, 'error', '🚨');
         } else if (diskUsage >= DISK_WARNING_THRESHOLD) {
             addAlert(`Uso de Disco ELEVADO: ${diskUsage}%.`, 'warning', '⚠️');
-        } else if (diskUsage > 50 && diskUsage < DISK_WARNING_THRESHOLD) { // Informative alert for moderate use
+        } else if (diskUsage > 50 && diskUsage < DISK_WARNING_THRESHOLD) {
             addAlert(`Uso de Disco moderado: ${diskUsage}%.`, 'info', 'ℹ️');
         }
 
-        // 4. Network Latency Alerts
-        const LATENCY_CRITICAL_THRESHOLD = 150; // ms
-        const LATENCY_WARNING_THRESHOLD = 80; // ms
+        const LATENCY_CRITICAL_THRESHOLD = 150;
+        const LATENCY_WARNING_THRESHOLD = 80;
         if (networkLatency >= LATENCY_CRITICAL_THRESHOLD) {
             addAlert(`Latencia de red CRÍTICA: ${networkLatency} ms.`, 'error', '🚨');
         } else if (networkLatency >= LATENCY_WARNING_THRESHOLD) {
@@ -155,27 +139,24 @@ async function fetchAndDisplaySystemStats() {
             addAlert(`Latencia de red normal: ${networkLatency} ms.`, 'info', 'ℹ️');
         }
 
-
-        // 5. Network Traffic Alerts (example: low traffic could be a warning)
-        const TRAFFIC_LOW_THRESHOLD_MBPS = 1; // Mbps (adjust as needed for your typical traffic)
+        const TRAFFIC_LOW_THRESHOLD_MBPS = 1;
         if (networkDownload < TRAFFIC_LOW_THRESHOLD_MBPS && networkUpload < TRAFFIC_LOW_THRESHOLD_MBPS) {
             addAlert(`Tráfico de red bajo (D: ${networkDownload} Mbps, U: ${networkUpload} Mbps).`, 'info', 'ℹ️');
         }
 
 
-        // If no alerts, display a "No alerts" message
         if (alertList.innerHTML === '') {
             alertList.innerHTML = '<p class="no-alerts">No hay alertas activas.</p>';
         }
 
 
-        // --- Footer Update ---
         document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-ES');
+
+        updateCharts(data, memoryUsage);
 
     } catch (error) {
         console.error('Error fetching system stats:', error);
         document.getElementById('last-update').textContent = `Error: ${error.message}`;
-        // Optionally, display an error message on the dashboard
         const mainContainer = document.querySelector('.dashboard-container');
         if (mainContainer) {
             mainContainer.innerHTML = '<p class="error-message">No se pudieron cargar los datos del servidor. Por favor, intente de nuevo más tarde.</p>';
@@ -183,9 +164,8 @@ async function fetchAndDisplaySystemStats() {
     }
 }
 
-// Initial call to fetch and display data when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    initializeCharts();
     fetchAndDisplaySystemStats();
-    // Refresh data every 5 seconds
-    setInterval(fetchAndDisplaySystemStats, 5000);
+    setInterval(fetchAndDisplaySystemStats, 60000); 
 });

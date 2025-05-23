@@ -1,11 +1,9 @@
-// Variables para almacenar las instancias de Chart.js
 let cpuChart;
 let memoryChart;
 let networkChart;
 
-// Arrays para almacenar el historial de datos
-const MAX_HISTORY_POINTS = 30; // Número máximo de puntos en el historial
-const labels = []; // Etiquetas de tiempo para el eje X
+const MAX_HISTORY_POINTS = 30; 
+const labels = []; 
 
 const cpuUsageHistory = [];
 const memoryUsageHistory = [];
@@ -13,10 +11,6 @@ const networkDownloadHistory = [];
 const networkUploadHistory = [];
 const networkLatencyHistory = [];
 
-/**
- * Inicializa todos los gráficos del dashboard.
- * Se llama una vez al cargar la página.
- */
 function initializeCharts() {
     console.log("INTENTO: Inicializando gráficos...");
 
@@ -38,38 +32,41 @@ function initializeCharts() {
 
     console.log("ÉXITO: Se encontraron todos los canvas y se obtuvieron los contextos 2D.");
 
-    // Configuración base para todos los gráficos
     const commonChartOptions = {
         responsive: true,
-        maintainAspectRatio: false, // Permite que los gráficos se adapten a su contenedor
+        maintainAspectRatio: false, 
         animation: {
-            duration: 0 // Deshabilita la animación para actualizaciones rápidas
+            duration: 0 
         },
         scales: {
             x: {
-                type: 'category', // O 'timeseries' si usas fechas exactas
+                type: 'category', 
                 labels: labels,
                 title: {
                     display: true,
                     text: 'Tiempo'
                 }
             },
-            y: {
-                beginAtZero: true,
+            y: { 
+                beginAtZero: true, 
                 title: {
                     display: true,
                     text: 'Valor'
                 },
                 ticks: {
                     callback: function(value) {
-                        return value + '%'; // Por defecto para porcentajes
+                        return value + '%'; 
                     }
+                },
+                grid: {
+                    display: true,
+                    color: 'rgba(0, 0, 0, 0.1)'
                 }
             }
         },
         plugins: {
             legend: {
-                display: false // O true si tienes múltiples datasets
+                display: false
             },
             tooltip: {
                 mode: 'index',
@@ -89,7 +86,13 @@ function initializeCharts() {
                 borderColor: 'rgb(75, 192, 192)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 fill: true,
-                tension: 0.1
+                tension: 0.1,
+                pointRadius: 4,
+                pointBackgroundColor: 'rgb(75, 192, 192)',
+                pointBorderColor: '#fff', 
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: 'rgb(75, 192, 192)',
+                pointHoverBorderColor: 'rgba(220,220,220,1)'
             }]
         },
         options: {
@@ -98,6 +101,8 @@ function initializeCharts() {
                 ...commonChartOptions.scales,
                 y: {
                     ...commonChartOptions.scales.y,
+                    min: 0, 
+                    max: 100,
                     title: {
                         display: true,
                         text: 'Uso (%)'
@@ -125,7 +130,13 @@ function initializeCharts() {
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 fill: true,
-                tension: 0.1
+                tension: 0.1,
+                pointRadius: 4,
+                pointBackgroundColor: 'rgb(255, 99, 132)',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: 'rgb(255, 99, 132)',
+                pointHoverBorderColor: 'rgba(220,220,220,1)'
             }]
         },
         options: {
@@ -134,6 +145,8 @@ function initializeCharts() {
                 ...commonChartOptions.scales,
                 y: {
                     ...commonChartOptions.scales.y,
+                    min: 0,  
+                    max: 100, 
                     title: {
                         display: true,
                         text: 'Uso (%)'
@@ -151,7 +164,6 @@ function initializeCharts() {
     console.log("Memory Chart creado.");
 
 
-    // --- Network Chart ---
     networkChart = new Chart(networkCtx, {
         type: 'line',
         data: {
@@ -162,9 +174,15 @@ function initializeCharts() {
                     data: networkDownloadHistory,
                     borderColor: 'rgb(54, 162, 235)',
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    fill: false, // No rellenar para ver ambas líneas claramente
+                    fill: false,
                     tension: 0.1,
-                    yAxisID: 'yDownload'
+                    yAxisID: 'yDownload',
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgb(54, 162, 235)',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: 'rgb(54, 162, 235)',
+                    pointHoverBorderColor: 'rgba(220,220,220,1)'
                 },
                 {
                     label: 'Subida (Mbps)',
@@ -173,7 +191,13 @@ function initializeCharts() {
                     backgroundColor: 'rgba(255, 159, 64, 0.2)',
                     fill: false,
                     tension: 0.1,
-                    yAxisID: 'yUpload'
+                    yAxisID: 'yUpload',
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgb(255, 159, 64)',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: 'rgb(255, 159, 64)',
+                    pointHoverBorderColor: 'rgba(220,220,220,1)'
                 },
                  {
                     label: 'Latencia (ms)',
@@ -182,7 +206,13 @@ function initializeCharts() {
                     backgroundColor: 'rgba(153, 102, 255, 0.2)',
                     fill: false,
                     tension: 0.1,
-                    yAxisID: 'yLatency' // Nuevo eje Y para latencia
+                    yAxisID: 'yLatency',
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgb(153, 102, 255)',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: 'rgb(153, 102, 255)',
+                    pointHoverBorderColor: 'rgba(220,220,220,1)'
                 }
             ]
         },
@@ -192,7 +222,7 @@ function initializeCharts() {
                 x: {
                     ...commonChartOptions.scales.x,
                 },
-                yDownload: { // Eje Y para descarga
+                yDownload: { 
                     type: 'linear',
                     position: 'left',
                     beginAtZero: true,
@@ -204,17 +234,23 @@ function initializeCharts() {
                         callback: function(value) {
                             return value + ' Mbps';
                         }
+                    },
+                    grid: { 
+                        display: true,
+                        color: 'rgba(0, 0, 0, 0.1)'
                     }
                 },
-                yUpload: { // Eje Y para subida (puede compartir con descarga o tener su propio eje si los rangos son muy diferentes)
+                yUpload: { 
                     type: 'linear',
-                    position: 'left', // Puede ser 'right' si quieres separarlo visualmente
+                    position: 'left', 
                     beginAtZero: true,
                     title: {
-                        display: false // Ocultar si comparte la misma escala que descarga
+                        display: false 
                     },
                      grid: {
-                         drawOnChartArea: false // Evitar que las líneas de la cuadrícula se dibujen dos veces
+                         drawOnChartArea: false, 
+                         display: true, 
+                         color: 'rgba(0, 0, 0, 0.1)'
                      },
                     ticks: {
                         callback: function(value) {
@@ -222,16 +258,18 @@ function initializeCharts() {
                         }
                     }
                 },
-                yLatency: { // Nuevo eje Y para latencia
+                yLatency: { 
                     type: 'linear',
-                    position: 'right', // Colocar en el lado derecho
+                    position: 'right',
                     beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Latencia (ms)'
                     },
                     grid: {
-                        drawOnChartArea: false // No dibujar la cuadrícula para este eje
+                        drawOnChartArea: false, 
+                        display: true, 
+                        color: 'rgba(0, 0, 0, 0.1)'
                     },
                     ticks: {
                         callback: function(value) {
@@ -243,7 +281,7 @@ function initializeCharts() {
             plugins: {
                 ...commonChartOptions.plugins,
                 legend: {
-                    display: true // Mostrar leyenda para múltiples datasets
+                    display: true
                 }
             }
         }
@@ -253,23 +291,22 @@ function initializeCharts() {
 }
 
 /**
- * Actualiza los gráficos con los nuevos datos recibidos.
- * @param {object} data - El objeto JSON con las últimas métricas.
+ * 
+ * @param {object} data 
+ * @param {number} memoryUsagePercent 
  */
-function updateCharts(data) {
+function updateCharts(data, memoryUsagePercent) {
     console.log("INTENTO: Actualizando gráficos con nuevos datos...");
-    // Añadir el nuevo punto de datos
     const currentTime = new Date().toLocaleTimeString('es-ES');
     labels.push(currentTime);
     cpuUsageHistory.push(data.cpu.usage_percentage || 0);
-    // Asegurarse de que memoryUsage esté definido y sea un número antes de usarlo
-    const memoryUsage = ((data.memory.used_gb || 0) / (data.memory.total_gb || 1)) * 100;
-    memoryUsageHistory.push(parseFloat(memoryUsage.toFixed(1)) || 0); // Asegurarse de que sea número
+    
+    memoryUsageHistory.push(memoryUsagePercent || 0); 
+    
     networkDownloadHistory.push(data.network.download_mbps || 0);
     networkUploadHistory.push(data.network.upload_mbps || 0);
     networkLatencyHistory.push(data.network.latency_ms || 0);
 
-    // Mantener solo el número máximo de puntos en el historial
     if (labels.length > MAX_HISTORY_POINTS) {
         labels.shift();
         cpuUsageHistory.shift();
@@ -279,7 +316,6 @@ function updateCharts(data) {
         networkLatencyHistory.shift();
     }
 
-    // Actualizar los gráficos
     if (cpuChart) {
         cpuChart.update();
         console.log("CPU Chart actualizado.");

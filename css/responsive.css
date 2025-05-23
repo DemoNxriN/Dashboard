@@ -1,19 +1,23 @@
 /* Responsive styles */
-
 /* Base (Mobile First) */
 .dashboard-container {
+  display: grid;
   grid-template-columns: 1fr;
+  padding: var(--space-5);
 }
 
 .status-cards {
+  display: grid;
   grid-template-columns: 1fr;
 }
 
 .charts-container {
+  display: grid;
   grid-template-columns: 1fr;
 }
 
 .details-container {
+  display: grid;
   grid-template-columns: 1fr;
 }
 
@@ -22,21 +26,21 @@
   .status-cards {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .charts-container {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
-  
+
   .details-container {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .main-header {
     padding: var(--space-3) var(--space-5);
   }
-  
+
   .dashboard-container {
-    padding: 0 var(--space-3);
+    padding: var(--space-5);
   }
 }
 
@@ -45,34 +49,34 @@
   .status-cards {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .dashboard-container {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 3fr 1fr;
     grid-template-areas:
       "details details"
       "charts alerts"
       "status status";
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
-  
+
   .status-overview {
     grid-area: status;
   }
-  
+
   .performance-section {
     grid-area: charts;
   }
-  
+
   .alerts-section {
     grid-area: alerts;
   }
-  
+
   .server-details {
     grid-area: details;
   }
-  
+
   .chart {
-    height: 250px;
+    height: 185px;
   }
 }
 
@@ -81,15 +85,15 @@
   .dashboard-container {
     padding: var(--space-5);
   }
-  
+
   .chart {
-    height: 300px;
+    height: 185px;
   }
-  
+
   h1 {
     font-size: var(--font-size-3xl);
   }
-  
+
   h2 {
     font-size: var(--font-size-2xl);
   }
@@ -102,20 +106,20 @@
     align-items: flex-start;
     gap: var(--space-3);
   }
-  
+
   .header-controls {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .custom-select {
     min-width: 150px;
   }
-  
+
   .server-selector-container label {
     display: none;
   }
-  
+
   .status-card-header h3 {
     font-size: var(--font-size-sm);
   }

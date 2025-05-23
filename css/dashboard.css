@@ -3,6 +3,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-4);
+  padding: var(--space-5);
 }
 
 .status-cards {
@@ -96,7 +97,7 @@
   width: 100%;
 }
 
-/* Gauges */
+
 .gauge-container {
   display: flex;
   flex-direction: column;
@@ -119,7 +120,6 @@
   background-color: var(--color-primary);
   border-radius: 4px;
   transition: width 1s ease, background-color 1s ease;
-  /* Para que el borde derecho no se redondee al 100% (solo izquierda) */
   border-radius: 4px 0 0 4px;
 }
 
@@ -130,7 +130,6 @@
   color: var(--color-text-primary);
 }
 
-/* Network stats */
 .network-stats {
   width: 100%;
   display: flex;
@@ -154,10 +153,9 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* Performance Charts */
 .charts-container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 3fr;
   gap: var(--space-3);
 }
 
@@ -167,33 +165,24 @@
   padding: var(--space-3);
   box-shadow: var(--shadow-sm);
   border: var(--border-width-thin) solid var(--color-border);
+  height: calc(200px + (var(--space-3) * 2));
+  width: auto;
 }
 
 .chart {
-  height: 200px;
+  height: 185px;
   background-color: var(--color-surface);
   border-radius: var(--border-radius-sm);
   position: relative;
   overflow: hidden;
+
+
 }
 
 .alert-list {
   overflow-y: auto;
   max-height: 740px;
-  padding-right: var(--space-2);
-}
 
-.alert-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.alert-list::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary-light);
-  border-radius: var(--border-radius-sm);
-}
-
-.alert-list::-webkit-scrollbar-track {
-  background-color: transparent;
 }
 
 .alert-item {
@@ -210,10 +199,6 @@
 
 .alert-item:hover {
   background-color: rgba(0, 0, 0, 0.02);
-}
-
-.dark-theme .alert-item:hover {
-  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .alert-icon {
